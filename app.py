@@ -1,8 +1,11 @@
+import os
+os.environ["OPENCV_IO_ENABLE_OPENEXR"] = "0"
+os.environ["ULTRALYTICS_SETTINGS"] = "False"
+
 import streamlit as st
 import torch
-import torch.nn as nn
 import numpy as np
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw
 from torchvision import transforms
 from ultralytics import YOLO
 
