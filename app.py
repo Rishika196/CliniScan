@@ -35,7 +35,7 @@ YOLO_ID = "1xzYVtQKGBvle7PPi4-XgwErhe7kSOiAm"
 def download_model():
     if not os.path.exists(YOLO_PATH):
         gdown.download(
-            f"https://drive.google.com/uc?id={YOLO_ID}",
+            f"https://drive.google.com/file/d/1xzYVtQKGBvle7PPi4-XgwErhe7kSOiAm/view?usp=drive_link",
             YOLO_PATH,
             quiet=False
         )
