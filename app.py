@@ -1,5 +1,5 @@
 # =========================
-# ENV SAFETY (CPU ONLY)
+# CPU ONLY (IMPORTANT)
 # =========================
 import os
 os.environ["CUDA_VISIBLE_DEVICES"] = ""
@@ -8,17 +8,14 @@ os.environ["CUDA_VISIBLE_DEVICES"] = ""
 # IMPORTS
 # =========================
 import gdown
-import torch
-import torch.nn as nn
 import numpy as np
 import cv2
 from PIL import Image
 from flask import Flask, render_template, request
-from torchvision import models, transforms
 from ultralytics import YOLO
 
 # =========================
-# BASE PATHS (CLOUD SAFE)
+# PATHS
 # =========================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_DIR = os.path.join(BASE_DIR, "models")
@@ -27,35 +24,23 @@ STATIC_DIR = os.path.join(BASE_DIR, "static")
 os.makedirs(MODEL_DIR, exist_ok=True)
 os.makedirs(STATIC_DIR, exist_ok=True)
 
-CLASSIFIER_PATH = os.path.join(MODEL_DIR, "clinicscan_classifier_15class.pth")
 YOLO_PATH = os.path.join(MODEL_DIR, "best.pt")
 OUTPUT_IMAGE_PATH = os.path.join(STATIC_DIR, "output.png")
 
 # =========================
-# GOOGLE DRIVE IDS
+# GOOGLE DRIVE MODEL
 # =========================
-CLASSIFIER_ID = "1SOaEcC9q29PL2ocrBLAg8QkMdxw-QjV2"
 YOLO_ID = "1xzYVtQKGBvle7PPi4-XgwErhe7kSOiAm"
 
-# =========================
-# MODEL DOWNLOAD (ON START)
-# =========================
-def download_models():
-    if not os.path.exists(CLASSIFIER_PATH):
-        gdown.download(
-            f"https://drive.google.com/file/d/1SOaEcC9q29PL2ocrBLAg8QkMdxw-QjV2/view?usp=drive_link",
-            CLASSIFIER_PATH,
-            quiet=False
-        )
-
+def download_model():
     if not os.path.exists(YOLO_PATH):
         gdown.download(
-            f"https://drive.google.com/file/d/1xzYVtQKGBvle7PPi4-XgwErhe7kSOiAm/view?usp=drive_link",
+            f"https://drive.google.com/uc?id={YOLO_ID}",
             YOLO_PATH,
             quiet=False
         )
 
-download_models()
+download_model()
 
 # =========================
 # FLASK APP
@@ -84,29 +69,15 @@ DISEASE_DEFINITIONS = {
 }
 
 # =========================
-# LAZY MODEL LOADING (CRITICAL)
+# LOAD YOLO (LAZY)
 # =========================
-classifier = None
 yolo_model = None
 
-@torch.no_grad()
-def load_classifier():
-    model = models.resnet50(weights=None)
-    model.fc = nn.Linear(2048, 15)
-    model.load_state_dict(torch.load(CLASSIFIER_PATH, map_location="cpu"))
-    model.eval()
-    return model
-
-def get_models():
-    global classifier, yolo_model
-
-    if classifier is None:
-        classifier = load_classifier()
-
+def get_yolo():
+    global yolo_model
     if yolo_model is None:
         yolo_model = YOLO(YOLO_PATH)
-
-    return classifier, yolo_model
+    return yolo_model
 
 # =========================
 # ROUTES
@@ -114,7 +85,7 @@ def get_models():
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
-        _, yolo = get_models()
+        yolo = get_yolo()
 
         image = Image.open(request.files["image"]).convert("RGB")
         img_cv = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
@@ -176,7 +147,7 @@ def index():
     return render_template("index.html")
 
 # =========================
-# ENTRY POINT (RENDER)
+# ENTRY POINT
 # =========================
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000, debug=False)
+    app.run(host="0.0.0.0", port=10000)
