@@ -1,12 +1,18 @@
-# Virtual environments
+# Python
+__pycache__/
+*.pyc
+
+# Virtual env
 cliniscan_env/
 venv/
 env/
 
-# Python cache
-__pycache__/
+# Models
+models/
+
+# Notebooks
 .ipynb_checkpoints/
-*.pyc
 
 # OS files
 .DS_Store
+Thumbs.db
