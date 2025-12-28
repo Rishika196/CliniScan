@@ -12,15 +12,13 @@
     <button type="submit">Analyze</button>
 </form>
 
-{% if classification %}
+{% if detections %}
 <hr>
-<h2>Classification Result:</h2>
-<p><b>{{ classification }}</b></p>
 
 <h2>YOLO Detections:</h2>
 <ul>
 {% for d, c in detections %}
-    <li>{{ d }} – {{ c }}</li>
+    <li><b>{{ d }}</b> – {{ c }}</li>
 {% endfor %}
 </ul>
 
@@ -31,6 +29,7 @@
 
 <h2>Annotated X-ray:</h2>
 <img src="{{ image_path }}" width="600">
+
 {% endif %}
 
 </body>
